@@ -1,0 +1,303 @@
+---
+title: "Simple linear regression"
+subtitle: " TP2"
+author: "LE MOAL Steven"
+output: 
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+
+## Example 1
+
+<ol>
+<li>We are going to use a dataset called Boston which is part of the MASS package. First install the MASS package and import it.</li>
+ 
+```{r setup, include=TRUE}
+# load MASS package
+library(MASS)
+
+# Check the dimensions of the Boston dataset
+dim(Boston)
+```
+
+<li>Split the dataset into train and test subets using only two variables : `lstat` and `medv`.</li>
+
+
+```{r}
+
+# Split the data by using the first 400 observations as the training
+# data and the remaining as the testing data
+train = 1:400
+test = -train
+
+# Speficy that we are going to use only two variables (lstat and medv)
+variables = c("lstat", "medv")
+training_data = Boston[train, variables]
+testing_data = Boston[test, variables]
+
+# Check the dimensions of the new dataset
+dim(training_data)
+    
+```
+
+<li>Check for linearity between `lstat` and `medv` features.</li>
+
+```{r}
+plot(training_data$lstat,training_data$medv,col='steelblue')
+
+```
+
+
+<li>According to the plot, we see that the relationship is not linear. Try a transformation of our explanatory variable lstat using the `log` function.</li>
+
+
+```{r}
+#training_data$lstat = log(training_data$lstat)
+```
+
+
+<li>Run the linear regression model using the log transformation.</li>
+
+
+```{r}
+model<-lm(medv~log(lstat),data=training_data)
+#summary(model)
+model
+```
+
+
+<li>Plot the obtained regression model.</li>
+
+
+```{r}
+plot(log(training_data$lstat), training_data$medv,
+xlab = "Log Transform of % of Houshold with Low Socioeconomic Income",
+ylab = "Median House Value",
+col = "red",
+pch = 20)
+
+abline(model, col = "blue", lwd =3)
+```
+
+
+
+<li>Predict what is the median value of the house with `lstat = 5%` </li>
+
+
+```{r}
+predict(model, data.frame(lstat = c(5)))
+```
+
+
+
+<li>Predict what is the median values of houses with `lstat= 5%, 10% , and 15%`.</li>
+
+
+```{r}
+predict(model, data.frame(lstat = c(5, 10, 15)))
+```
+
+
+
+<li>Compute the mean squared error (MSE) using the test data</li>
+
+
+```{r}
+train_model <- predict(model, data.frame(lstat = testing_data$lstat))
+train_MSE <- mean((testing_data$medv - train_model)^2)
+train_MSE
+```
+</ol>
+## Example 2
+
+<ol>
+<li>Load required packages (install them otherwise):
+<ul>
+   <li>datarium for data manipulation and visualization.</li>
+   <li>ggpubr: creates easily a publication ready-plot.</li>
+</ul>
+</li>
+```{r}
+library(datarium)
+library(ggpubr)
+
+```
+
+<li>Load and inspect the marketing data.</li>
+
+
+```{r}
+data("marketing", package = "datarium")
+head(marketing, 4)
+
+str(marketing)
+
+summary(marketing)
+
+```
+<li>We want to predict future sales on the basis of advertising budget spent on youtube. Create a scatter plot displaying the sales units versus youtube advertising budget and add a smoothed line.</li>
+
+
+
+```{r}
+ggplot(marketing, aes(x = youtube, y = sales)) + geom_point() + stat_smooth()
+```
+
+<blockquote> The graph above suggests a linearly increasing relationship between the sales and the youtube variables. This is a good thing, because, one important assumption of the linear regression is that the relationship between the outcome and predictor variables is linear. 
+
+It’s also possible to compute the correlation coefficient between the two variables using the `R` function `cor()` </blockquote>
+
+<li>Compute the correlation coefficient between `sales` and `youtube` features.</li>
+
+
+```{r}
+cor(marketing$sales, marketing$youtube)
+```
+
+<blockquote> A correlation value closer to 0 suggests a weak relationship between the variables. A low correlation `(-0.2 < x < 0.2)` probably suggests that much of variation of the outcome variable `(y)` is not explained by the predictor `(x)`. In such case, we should probably look for better predictor variables.
+
+In our example, the correlation coefficient is large enough, so we can continue by building a linear model of `y` as a function of `x`.</blockquote>
+
+<li>The simple linear regression tries to find the best line to predict `sales` on the basis of `youtube` advertising budget. The linear model equation can be written as follow: `sales = b0 + b1 * youtube`. Use the `R` function `lm()` to determine the beta coefficients of the linear model</li>
+
+
+```{r}
+model <- lm(sales ~ youtube, data = marketing)
+model
+```
+
+<li>Plat the `summary` table and give an interpretation of the obtained results.</li>
+
+
+```{r}
+summary(model)
+```
+
+<li>Add the regression line into the scatter plot, you can use the function `stat_smooth() [ggplot2]`. By default, the fitted line is presented with confidence interval around it. The confidence bands reflect the uncertainty about the line. If you don’t want to display it, specify the option `se = FALSE` in the function `stat_smooth()`.</li>
+
+
+```{r}
+ggplot(marketing, aes(x = youtube, y = sales)) + geom_point() + stat_smooth(method = lm, se =FALSE)
+```
+
+### The significance of the model 
+
+<blockquote> In the previous section, we built a linear model of sales as a function of youtube advertising budget: `sales = 8.44 + 0.048*youtube`.
+
+Before using this formula to predict future `sales`, you should make sure that this model is statistically significant, that is:
+  <ul>
+    <li>There is a statistically significant relationship between the predictor and the outcome variables</li>
+    <li>The model that we built fits very well the data in our hand. Now we’ll try to check the quality of a linear regression model</li>
+  </ul>
+</blockquote>
+ 
+<li>Use the `help` function to describe the `summary` outputs.</li>
+
+
+```{r}
+help(summary)
+```
+
+<li>Use the `p-values` for the intercept and the predictor variable to check the if they are significant which means that there is a significant association between the predictor and the outcome variables.</li>
+
+
+```{r}
+summary(model)
+#p-values for the 'intercept' et the'predictor' (youtube) variable is significant.
+```
+
+<li>Compute the `95%` confidence interval for the coefficient `b1` using the `confint` function.</li>
+
+
+```{r}
+confint(model)
+```
+
+### Model accuracy:
+
+<blockquote> Once you identified that, at least, one predictor variable is significantly associated the outcome, you should continue the diagnostic by checking how well the model fits the data. This process is also referred to as the goodness-of-fit
+
+The overall quality of the linear regression fit can be assessed using the following three quantities, displayed in the model summary:
+<ul>
+    <li>The `Residual Standard Error (RSE)`</li>
+    <li>The `R-squared (R2)`</li>
+    <li>`Fstatistic`</li>
+</ul>    
+</blockquote>
+
+<li>Find those three mesures for our regression model.</li>
+
+
+```{r}
+#At the end of the summary
+#Residual standard error: 3.91 on 198 degrees of freedom
+#Multiple R-squared:  0.6119,	Adjusted R-squared:  0.6099 
+#F-statistic: 312.1 on 1 and 198 DF,  p-value: < 2.2e-16
+summary(model)
+```
+
+
+<blockquote> The `RSE` (also known as the model sigma) is the residual variation, representing the average variation of the observations points around the fitted regression line. This is the standard deviation of residual errors.
+
+`RSE` provides an absolute measure of patterns in the data that can’t be explained by the model. When comparing two models, the model with the small `RSE` is a good indication that this model fits the best the data.
+
+Dividing the `RSE` by the average value of the outcome variable will give you the prediction error rate, which should be as small as possible.
+
+In our example, `RSE = 3.91`, meaning that the observed sales values deviate from the true regression line by approximately `3.9` units in average.
+
+Whether or not an `RSE` of `3.9` units is an acceptable prediction error is subjective and depends on the problem context. This is why we usually normalise it with respect to the predicted variable.
+</blockquote>
+
+<li>Calculate the percentage error: `RSE/mean(y)`</li>
+
+
+```{r}
+sigma(model)*100/mean(marketing$sales)
+```
+
+
+
+<blockquote>The `R-squared (R2)` ranges from 0 to 1 and represents the proportion of information (i.e. variation) in the data that can be explained by the model. The adjusted `R-squared` adjusts for the degrees of freedom.
+
+The `R2` measures, how well the model fits the data. For a simple linear regression, `R2` is the square of the Pearson correlation coefficient.
+
+A high value of `R2` is a good indication. However, as the value of `R2` tends to increase when more predictors are added in the model, such as in multiple linear regression model, you should mainly consider the adjusted `R-squared`, which is a penalized `R2` for a higher number of predictors.
+
+An (adjusted) `R2` that is close to 1 indicates that a large proportion of the variability in the outcome has been explained by the regression model. A number near 0 indicates that the regression model did not explain much of the variability in the outcome. `F-Statistic`: The `F-statistic` gives the overall significance of the model. It assess whether at least one predictor variable has a non-zero coefficient.
+
+In a simple linear regression, this test is not really interesting since it just duplicates the information in given by the `t-test`, available in the coefficient table. In fact, the F test is identical to the square of the t `test: 312.1 = (17.67)^2`. This is true in any model with 1 degree of freedom.
+
+The `F-statistic` becomes more important once we start using multiple predictors as in multiple linear regression.
+
+A large `F-statistic` will corresponds to a statistically significant `p-value (p < 0.05)`. In our example, the `F-statistic equal 312.14` producing a `p-value of 1.46e-42`, which is highly significant.</blockquote>
+
+
+
+<li>Is the `F test` significant in our case?</li>
+
+
+```{r}
+#The F test is not significant for simple linear regression but a large F-statistic (312.1) will corresponds to a statistically significant p-value (p < 0.05 : p = 2.2e-16) which is highly significant.
+```
+
+<blockquote>Make sure your data meet the assumptions: We can use R to check that our data meet the four main assumptions for linear regression. This can be done only after the model conructiion as we will see. </blockquote>
+
+<li>Check main assumptions for linear regression using plots seen in the course. Recall that they may summurised by : residuals need to be normal, independent and have same variance and `(X,y)` need to have good linear corrlation.</li>
+
+
+```{r}
+par(mfrow = c(2, 2))
+plot(model)
+```
+
+
+<li>Give an interpretation of the `Residuals vs. Leverage` Plot.</li>
+
+
+```{r}
+#There is no outliers that exceed 3 standart deviations
+#All data points, have a leverage statistic below 2(p + 1)/n = 0.02
+```
+
+</ol>

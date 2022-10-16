@@ -1,0 +1,294 @@
+---
+title: "Multiple Linear Regression"
+subtitle: " TP3"
+author: Steven Le Moal
+output: 
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+
+In this practical work, we will continue the analysis of the Boston data. Recall that this dataset records the median value of houses for 506 neighborhoods around Boston. Our task is to predict the median house value (`medv`)
+
+<ol>
+<li> Load the Boston dataset from MASS package.</li>
+
+```{r setup, include=TRUE}
+# load MASS package
+library(MASS)
+library("ggplot2")
+library(caTools)
+#updateR()
+# Check the dimensions of the Boston dataset
+dim(Boston)
+```
+
+<li> Split the dataset into traning set and testing set. (keep all the variables of the Boston data set).</li>
+
+
+```{r,  echo=TRUE}
+# Split the data by using the first 400 observations as the training
+# data and the remaining as the testing data
+
+#train = 1:400
+#test = -train
+
+set.seed(123)
+# Split the data as the training
+# data and the remaining as the testing data
+split = sample.split(Boston, SplitRatio = 0.8)
+
+training_data = Boston[split,]
+testing_data = Boston[-split,]
+
+
+```
+
+<li> Check if there is a linear relationship between the variables `medv` and `age`. (use `cor()` function). </li>
+
+```{r,  echo=TRUE}
+# check either in the training set or the original
+cor(Boston$medv,Boston$age)
+```
+
+
+
+<li> Fit a model of housing prices in function of `age` and plot the observations and the regression line. </li>
+
+```{r,  echo=TRUE}
+modele = lm(medv~age, data = training_data)
+modele
+```
+
+```{r, echo=TRUE}
+plot(training_data$age, training_data$medv,
+xlab = " housing prices in function of age",
+ylab = "Median House Value",
+col = "red",
+pch = 20)
+
+# Make the line color blue, and the line's width =3 (play with the width!)
+abline(modele, col = "blue", lwd =3)
+```
+
+<li>  Train a regression model using both `lstat` and `age` as predictors of median house value. (Remember that we transformed `lstat`, use the same transformation here). What is the obtained model? </li>
+
+```{r,  echo=TRUE}
+modele2 = lm(medv~log(lstat)+age,data=training_data)
+summary(modele2)
+```
+
+
+
+```{r,  echo=TRUE}
+library("rgl")
+plot3d(log(Boston$lstat),
+            Boston$age,
+            Boston$medv, type = "p",col = 'red' , 
+            xlab = "log(lstat)",
+            ylab = "age",
+            zlab = "medv", site = 5 , lwd = 15)
+
+
+planes3d(modele2$coefficients["log(lstat)"],
+              modele2$coefficients["age"], -1,
+              modele2$coefficients["(Intercept)"], alpha = 0.3,  color = "blue",front = "line")
+```              
+
+<li> Print the summary of the obtained regression model.</li>
+
+```{r,  echo=TRUE}
+summary(modele2)
+```
+
+
+<li>  Are the predictors significant ? </li>
+
+```{r,  echo=TRUE}
+#The p-value (2.2e-16) < 0.5 : the model have significant predictors .
+#lstat coefficient equal -14.38
+#But age coefficient equal 0.06, so the age is not significant.
+```
+
+
+<li> Is the model as a whole significant? Answer on this question must be detailed.</li>
+
+```{r,  echo=TRUE}
+#R^2 = 0.6975 (and adjusted R^2): the model is significant as a whole. 69% of the model variation is being explained by the predictor log(lstat). We can maybe add independant variable 
+#Also F = 455.4
+```
+
+
+<li> Train a new model using all the variables of the dataset. (We can use . as a short cut instead of writing down all the variables names) </li>
+
+```{r,  echo=TRUE}
+modele3 =lm(medv~.,data = training_data)
+summary(modele3)
+```
+
+
+<li> When using all the variables as predictors, we didn’t transform lstat. Re train the model using `log(lstat)` instead of `lstat`.</li>
+
+```{r,  echo=TRUE}
+modele4 = lm(medv~. + log(lstat) - lstat, data = training_data)
+summary(modele4)
+```
+
+
+<li>  Did $R^2$ improve ? </li>
+
+```{r,  echo=TRUE}
+#Yes :
+
+#With lstat :Multiple R-squared:  0.7683,	Adjusted R-squared:  0.7604 
+
+#With log(lstat) : Multiple R-squared:  0.8128 (and	Adjusted R-squared:  0.8065)
+
+```
+
+
+<li> To see if there is correlated variables print the correlation matrix using the `cor()` function (round the correlations with 2 digits).</li>
+
+```{r,  echo=TRUE}
+round(cor(training_data), 2)
+```
+
+
+<li> Visualize the correlations using the `corrplot` package. To do so, install the `corrplot` package, load it, then use the function `corrplot.mixed()`. See this [link](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html) for examples and to understand how to use it.</li>
+
+```{r,  echo=TRUE}
+#install.packages("corrplot")
+library(corrplot)
+corrplot.mixed(cor = round(cor(training_data), 2))
+```
+
+
+<li> What is the correlation between tax and rad? </li>
+
+```{r,  echo=TRUE}
+#we can look in the above plot or ..
+cor(training_data$tax, training_data$rad)
+```
+
+
+<li> Run the model again without `tax`. What happens to the $R^2$ ? and for the `F-statistic`?</li>
+
+```{r,  echo=TRUE}
+modele5 = lm(medv~. + log(lstat) - lstat - tax, data = training_data)
+summary(modele5)
+```
+```{r,  echo=TRUE}
+#Multiple R-squared:  0.8094,	Adjusted R-squared:  0.8034
+#F-statistic: 136.2
+
+#Previous R-squared
+#Previous F-statistic: 128.3
+
+#R-squared decreased but F-statistic decreased
+
+#Thus the model is more significant
+```
+
+<blockquote> Of course $R^2$ should go a little lower because we deleted one of the variables. But check for the model significance (`F-statistic`) gets higher, which means the `p-values` gets lower and thus the model is more significant without `rad`.</blockquote>
+
+<li> Calculate the mean squared error (MSE) for the last model.</li>
+
+```{r,  echo=TRUE}
+train_model <- predict(modele5, testing_data)
+train_MSE <- mean((testing_data$medv - train_model)^2)
+train_MSE
+```
+
+`Anova`
+
+Next we will apply an analysis of variances (`ANOVA`) in order to test if there is a significant difference of means between two groups `i` and `j` (Consider group `i` is the suburbs bounding the river and `j` the suburbs which not). The hypotheses are
+
+$H0:μ_i=μ_j$
+
+$H1:μi≠μj$
+
+Where $μ_i$ is the mean of `medv` in group `i`.
+
+
+<li> In the Boston data set there is a categorical variable `chas` which corresponds to Charles River (= 1 if a suburb bounds the river; 0 otherwise). Use command `str()` to see how this variable is present in the dataset. How many of the suburbs in this data set bound the Charles river?</li>
+
+```{r,  echo=TRUE}
+nrow(subset(Boston, chas==1))
+```
+
+
+<li> Create Boxplots of the median value of houses with respect to the variable `chas`. Do we observe some difference between the median value of houses with respect to the neighborhood to Charles River?</li>
+
+```{r,  echo=TRUE}
+boxplot(medv~chas,data=Boston)
+```
+
+<li> Calculate $μ_i$ and $μ_j$ (in one line using the function `aggregate()`).</li>
+
+```{r,  echo=TRUE}
+aggregate(formula = medv ~ chas, data = training_data, FUN = mean)
+```
+
+
+<li>  Apply an `ANOVA` test of `medv` whith respect to `chas` (use the function `aov()`). Print the result and the summary of it. what do you conclude ?</li>
+
+```{r,  echo=TRUE}
+modele6 = aov(medv ~ chas, data = Boston)
+summary(modele6)
+```
+
+`Qualitative predictors`
+
+We are going to use the categorical variable `chas` which corresponds to Charles River (= 1 if a suburb bounds the river; 0 otherwise). Using the `str()` command you can notice that this variable is not codified as a factor, but it has values 0 or 1, so it is already dummyfied.
+
+
+<li> Fit a new model where the predictors are the Charles River and the Crime Rate. Interpret the coefficients of this model and conclude if the presence of the river adds a valuable information for explaining the house price.</li>
+
+```{r,  echo=TRUE}
+modele7 = lm(medv ~ chas + crim, data = training_data)
+summary(modele7)
+```
+
+```{r,  echo=TRUE}
+#Coefficient of chas : 5.65796
+#Coefficient of crim : -0.39955
+
+#p-value: < 2.2e-16
+
+#Multiple R-squared:  0.1877
+
+#They can add information to the model but even though it is not significant (especialy for crim but chas can be significant with more variable)
+
+```
+<li>  Is `chas` is significant as well in the presence of more predictors? </li>
+
+```{r,  echo=TRUE}
+
+#even though R-squared equals 0.1877, chas can add a bit information to the model since with the previous modele (with all the variable) :
+#Coefficients:
+#              Estimate Std. Error t value 
+#chas          2.887497   0.795916   3.628 
+```
+
+`Interaction terms`
+
+We may sometimes try models with intercation terms. Let’s say we have two predictors $X_1$ and $X_2$, the way of adding these interactions in `lm` is through `:` and `*`. The operator `:` only adds the term $X_1 X_2$ and `*` adds $X_1$, $X_2$, and $X_1 X_2$.
+
+<li> Fit a model whith first order interaction term where predictors are `lstat` and `age`. Print its summary.</li>
+
+```{r,  echo=TRUE}
+modele8 = lm(medv ~ lstat * age, data = training_data)
+summary(modele8)
+
+```
+
+<li> Fit a model with all the first order interaction terms.</li>
+
+```{r,  echo=TRUE}
+modele9<- lm(medv ~ (.)^2 -(.), data = training_data)
+summary(modele9)
+```
+
+
+
+</ol>

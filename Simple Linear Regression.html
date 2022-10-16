@@ -1,0 +1,509 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+
+  
+    
+    
+    
+
+        
+    
+    
+    
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+        
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+
+
+
+
+   	
+            
+   <div>
+     <nav>
+       <a rel="noopener" href="#"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
+     </nav>
+         
+   
+        
+      <h1 class="title">Simple linear regression</h1>
+         <h1 class="subtitle">TP2</h1>
+   
+         
+   <div>
+    <h2><a rel="noopener" href="#content">Simple linear regression</a></h2>
+    <div>
+      <ul>
+      <li><a rel="noopener" href="#example-1">Example 1</a></li>
+      <li><a rel="noopener" href="#example-2">Example 2</a></li>
+      </ul>
+    </div>
+    <div class="status">
+                  <p class="author"><span class="glyphicon glyphicon-user"></span> LE
+MOAL Steven</p>
+                      </div>
+   </div>
+     
+
+   
+      
+   
+ 
+<div>
+<div class="section level2">
+<h2>Example 1</h2>
+<ol>
+<li>
+We are going to use a dataset called Boston which is part of the MASS
+package. First install the MASS package and import it.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb1-1"></a><span class="co"># load MASS package</span></span>
+<span><a rel="noopener" href="#cb1-2"></a><span class="fu">library</span>(MASS)</span>
+<span><a rel="noopener" href="#cb1-3"></a></span>
+<span><a rel="noopener" href="#cb1-4"></a><span class="co"># Check the dimensions of the Boston dataset</span></span>
+<span><a rel="noopener" href="#cb1-5"></a><span class="fu">dim</span>(Boston)</span></code></pre></div>
+<pre><code>## [1] 506  14</code></pre>
+<li>
+Split the dataset into train and test subets using only two variables :
+<code>lstat</code> and <code>medv</code>.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb3-1"></a><span class="co"># Split the data by using the first 400 observations as the training</span></span>
+<span><a rel="noopener" href="#cb3-2"></a><span class="co"># data and the remaining as the testing data</span></span>
+<span><a rel="noopener" href="#cb3-3"></a>train <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span></span>
+<span><a rel="noopener" href="#cb3-4"></a>test <span class="ot">=</span> <span class="sc">-</span>train</span>
+<span><a rel="noopener" href="#cb3-5"></a></span>
+<span><a rel="noopener" href="#cb3-6"></a><span class="co"># Speficy that we are going to use only two variables (lstat and medv)</span></span>
+<span><a rel="noopener" href="#cb3-7"></a>variables <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;lstat&quot;</span>, <span class="st">&quot;medv&quot;</span>)</span>
+<span><a rel="noopener" href="#cb3-8"></a>training_data <span class="ot">=</span> Boston[train, variables]</span>
+<span><a rel="noopener" href="#cb3-9"></a>testing_data <span class="ot">=</span> Boston[test, variables]</span>
+<span><a rel="noopener" href="#cb3-10"></a></span>
+<span><a rel="noopener" href="#cb3-11"></a><span class="co"># Check the dimensions of the new dataset</span></span>
+<span><a rel="noopener" href="#cb3-12"></a><span class="fu">dim</span>(training_data)</span></code></pre></div>
+<pre><code>## [1] 400   2</code></pre>
+<li>
+Check for linearity between <code>lstat</code> and <code>medv</code>
+features.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb5-1"></a><span class="fu">plot</span>(training_data<span class="sc">$</span>lstat,training_data<span class="sc">$</span>medv,<span class="at">col=</span><span class="st">&#39;steelblue&#39;</span>)</span></code></pre></div>
+<p><img src="javascript://" width="768"/></p>
+<li>
+According to the plot, we see that the relationship is not linear. Try a
+transformation of our explanatory variable lstat using the
+<code>log</code> function.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb6-1"></a><span class="co">#training_data$lstat = log(training_data$lstat)</span></span></code></pre></div>
+<li>
+Run the linear regression model using the log transformation.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb7-1"></a>model<span class="ot">&lt;-</span><span class="fu">lm</span>(medv<span class="sc">~</span><span class="fu">log</span>(lstat),<span class="at">data=</span>training_data)</span>
+<span><a rel="noopener" href="#cb7-2"></a><span class="co">#summary(model)</span></span>
+<span><a rel="noopener" href="#cb7-3"></a>model</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = medv ~ log(lstat), data = training_data)
+## 
+## Coefficients:
+## (Intercept)   log(lstat)  
+##       51.78       -12.20</code></pre>
+<li>
+Plot the obtained regression model.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb9-1"></a><span class="fu">plot</span>(<span class="fu">log</span>(training_data<span class="sc">$</span>lstat), training_data<span class="sc">$</span>medv,</span>
+<span><a rel="noopener" href="#cb9-2"></a><span class="at">xlab =</span> <span class="st">&quot;Log Transform of % of Houshold with Low Socioeconomic Income&quot;</span>,</span>
+<span><a rel="noopener" href="#cb9-3"></a><span class="at">ylab =</span> <span class="st">&quot;Median House Value&quot;</span>,</span>
+<span><a rel="noopener" href="#cb9-4"></a><span class="at">col =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span><a rel="noopener" href="#cb9-5"></a><span class="at">pch =</span> <span class="dv">20</span>)</span>
+<span><a rel="noopener" href="#cb9-6"></a></span>
+<span><a rel="noopener" href="#cb9-7"></a><span class="fu">abline</span>(model, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span><span class="dv">3</span>)</span></code></pre></div>
+<p><img src="javascript://" width="768"/></p>
+<li>
+Predict what is the median value of the house with
+<code>lstat = 5%</code>
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb10-1"></a><span class="fu">predict</span>(model, <span class="fu">data.frame</span>(<span class="at">lstat =</span> <span class="fu">c</span>(<span class="dv">5</span>)))</span></code></pre></div>
+<pre><code>##        1 
+## 32.14277</code></pre>
+<li>
+Predict what is the median values of houses with
+<code>lstat= 5%, 10% , and 15%</code>.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb12-1"></a><span class="fu">predict</span>(model, <span class="fu">data.frame</span>(<span class="at">lstat =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>)))</span></code></pre></div>
+<pre><code>##        1        2        3 
+## 32.14277 23.68432 18.73644</code></pre>
+<li>
+Compute the mean squared error (MSE) using the test data
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb14-1"></a>train_model <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="fu">data.frame</span>(<span class="at">lstat =</span> testing_data<span class="sc">$</span>lstat))</span>
+<span><a rel="noopener" href="#cb14-2"></a>train_MSE <span class="ot">&lt;-</span> <span class="fu">mean</span>((testing_data<span class="sc">$</span>medv <span class="sc">-</span> train_model)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span><a rel="noopener" href="#cb14-3"></a>train_MSE</span></code></pre></div>
+<pre><code>## [1] 17.69552</code></pre>
+</ol>
+</div>
+<div class="section level2">
+<h2>Example 2</h2>
+<ol>
+<li>
+Load required packages (install them otherwise):
+<ul>
+<li>
+datarium for data manipulation and visualization.
+</li>
+<li>
+ggpubr: creates easily a publication ready-plot.
+</li>
+</ul>
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb16-1"></a><span class="fu">library</span>(datarium)</span>
+<span><a rel="noopener" href="#cb16-2"></a><span class="fu">library</span>(ggpubr)</span></code></pre></div>
+<pre><code>## Le chargement a n&#233;cessit&#233; le package : ggplot2</code></pre>
+<li>
+Load and inspect the marketing data.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb18-1"></a><span class="fu">data</span>(<span class="st">&quot;marketing&quot;</span>, <span class="at">package =</span> <span class="st">&quot;datarium&quot;</span>)</span>
+<span><a rel="noopener" href="#cb18-2"></a><span class="fu">head</span>(marketing, <span class="dv">4</span>)</span></code></pre></div>
+<pre><code>##   youtube facebook newspaper sales
+## 1  276.12    45.36     83.04 26.52
+## 2   53.40    47.16     54.12 12.48
+## 3   20.64    55.08     83.16 11.16
+## 4  181.80    49.56     70.20 22.20</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb20-1"></a><span class="fu">str</span>(marketing)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    200 obs. of  4 variables:
+##  $ youtube  : num  276.1 53.4 20.6 181.8 217 ...
+##  $ facebook : num  45.4 47.2 55.1 49.6 13 ...
+##  $ newspaper: num  83 54.1 83.2 70.2 70.1 ...
+##  $ sales    : num  26.5 12.5 11.2 22.2 15.5 ...</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb22-1"></a><span class="fu">summary</span>(marketing)</span></code></pre></div>
+<pre><code>##     youtube          facebook       newspaper          sales      
+##  Min.   :  0.84   Min.   : 0.00   Min.   :  0.36   Min.   : 1.92  
+##  1st Qu.: 89.25   1st Qu.:11.97   1st Qu.: 15.30   1st Qu.:12.45  
+##  Median :179.70   Median :27.48   Median : 30.90   Median :15.48  
+##  Mean   :176.45   Mean   :27.92   Mean   : 36.66   Mean   :16.83  
+##  3rd Qu.:262.59   3rd Qu.:43.83   3rd Qu.: 54.12   3rd Qu.:20.88  
+##  Max.   :355.68   Max.   :59.52   Max.   :136.80   Max.   :32.40</code></pre>
+<li>
+We want to predict future sales on the basis of advertising budget spent
+on youtube. Create a scatter plot displaying the sales units versus
+youtube advertising budget and add a smoothed line.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb24-1"></a><span class="fu">ggplot</span>(marketing, <span class="fu">aes</span>(<span class="at">x =</span> youtube, <span class="at">y =</span> sales)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">stat_smooth</span>()</span></code></pre></div>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="javascript://" width="768"/></p>
+<blockquote>
+<p>The graph above suggests a linearly increasing relationship between
+the sales and the youtube variables. This is a good thing, because, one
+important assumption of the linear regression is that the relationship
+between the outcome and predictor variables is linear.</p>
+It’s also possible to compute the correlation coefficient between the
+two variables using the <code>R</code> function <code>cor()</code>
+</blockquote>
+<li>
+Compute the correlation coefficient between <code>sales</code> and
+<code>youtube</code> features.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb26-1"></a><span class="fu">cor</span>(marketing<span class="sc">$</span>sales, marketing<span class="sc">$</span>youtube)</span></code></pre></div>
+<pre><code>## [1] 0.7822244</code></pre>
+<blockquote>
+<p>A correlation value closer to 0 suggests a weak relationship between
+the variables. A low correlation <code>(-0.2 &lt; x &lt; 0.2)</code>
+probably suggests that much of variation of the outcome variable
+<code>(y)</code> is not explained by the predictor <code>(x)</code>. In
+such case, we should probably look for better predictor variables.</p>
+In our example, the correlation coefficient is large enough, so we can
+continue by building a linear model of <code>y</code> as a function of
+<code>x</code>.
+</blockquote>
+<li>
+The simple linear regression tries to find the best line to predict
+<code>sales</code> on the basis of <code>youtube</code> advertising
+budget. The linear model equation can be written as follow:
+<code>sales = b0 + b1 * youtube</code>. Use the <code>R</code> function
+<code>lm()</code> to determine the beta coefficients of the linear model
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb28-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> youtube, <span class="at">data =</span> marketing)</span>
+<span><a rel="noopener" href="#cb28-2"></a>model</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = sales ~ youtube, data = marketing)
+## 
+## Coefficients:
+## (Intercept)      youtube  
+##     8.43911      0.04754</code></pre>
+<li>
+Plat the <code>summary</code> table and give an interpretation of the
+obtained results.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb30-1"></a><span class="fu">summary</span>(model)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = sales ~ youtube, data = marketing)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.0632  -2.3454  -0.2295   2.4805   8.6548 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 8.439112   0.549412   15.36   &lt;2e-16 ***
+## youtube     0.047537   0.002691   17.67   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.91 on 198 degrees of freedom
+## Multiple R-squared:  0.6119, Adjusted R-squared:  0.6099 
+## F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+<li>
+Add the regression line into the scatter plot, you can use the function
+<code>stat_smooth() [ggplot2]</code>. By default, the fitted line is
+presented with confidence interval around it. The confidence bands
+reflect the uncertainty about the line. If you don’t want to display it,
+specify the option <code>se = FALSE</code> in the function
+<code>stat_smooth()</code>.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb32-1"></a><span class="fu">ggplot</span>(marketing, <span class="fu">aes</span>(<span class="at">x =</span> youtube, <span class="at">y =</span> sales)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">stat_smooth</span>(<span class="at">method =</span> lm, <span class="at">se =</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="javascript://" width="768"/></p>
+<div class="section level3">
+<h3>The significance of the model</h3>
+<blockquote>
+<p>In the previous section, we built a linear model of sales as a
+function of youtube advertising budget:
+<code>sales = 8.44 + 0.048*youtube</code>.</p>
+Before using this formula to predict future <code>sales</code>, you
+should make sure that this model is statistically significant, that is:
+<ul>
+<li>
+There is a statistically significant relationship between the predictor
+and the outcome variables
+</li>
+<li>
+The model that we built fits very well the data in our hand. Now we’ll
+try to check the quality of a linear regression model
+</li>
+</ul>
+</blockquote>
+</div><li>
+Use the <code>help</code> function to describe the <code>summary</code>
+outputs.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb34-1"></a><span class="fu">help</span>(summary)</span></code></pre></div>
+<li>
+Use the <code>p-values</code> for the intercept and the predictor
+variable to check the if they are significant which means that there is
+a significant association between the predictor and the outcome
+variables.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb35-1"></a><span class="fu">summary</span>(model)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = sales ~ youtube, data = marketing)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.0632  -2.3454  -0.2295   2.4805   8.6548 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 8.439112   0.549412   15.36   &lt;2e-16 ***
+## youtube     0.047537   0.002691   17.67   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.91 on 198 degrees of freedom
+## Multiple R-squared:  0.6119, Adjusted R-squared:  0.6099 
+## F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb37-1"></a><span class="co">#p-values for the &#39;intercept&#39; et the&#39;predictor&#39; (youtube) variable is significant.</span></span></code></pre></div>
+<li>
+Compute the <code>95%</code> confidence interval for the coefficient
+<code>b1</code> using the <code>confint</code> function.
+</li>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb38-1"></a><span class="fu">confint</span>(model)</span></code></pre></div>
+<pre><code>##                  2.5 %     97.5 %
+## (Intercept) 7.35566312 9.52256140
+## youtube     0.04223072 0.05284256</code></pre>
+</ol></div>
+<div class="section level3">
+<h3>Model accuracy:</h3>
+<blockquote>
+<p>Once you identified that, at least, one predictor variable is
+significantly associated the outcome, you should continue the diagnostic
+by checking how well the model fits the data. This process is also
+referred to as the goodness-of-fit</p>
+The overall quality of the linear regression fit can be assessed using
+the following three quantities, displayed in the model summary:
+<ul>
+<li>
+The <code>Residual Standard Error (RSE)</code>
+</li>
+<li>
+The <code>R-squared (R2)</code>
+</li>
+<li>
+<code>Fstatistic</code>
+</li>
+</ul>
+</blockquote>
+
+Find those three mesures for our regression model.
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb40-1"></a><span class="co">#At the end of the summary</span></span>
+<span><a rel="noopener" href="#cb40-2"></a><span class="co">#Residual standard error: 3.91 on 198 degrees of freedom</span></span>
+<span><a rel="noopener" href="#cb40-3"></a><span class="co">#Multiple R-squared:  0.6119,   Adjusted R-squared:  0.6099 </span></span>
+<span><a rel="noopener" href="#cb40-4"></a><span class="co">#F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</span></span>
+<span><a rel="noopener" href="#cb40-5"></a><span class="fu">summary</span>(model)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = sales ~ youtube, data = marketing)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.0632  -2.3454  -0.2295   2.4805   8.6548 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 8.439112   0.549412   15.36   &lt;2e-16 ***
+## youtube     0.047537   0.002691   17.67   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.91 on 198 degrees of freedom
+## Multiple R-squared:  0.6119, Adjusted R-squared:  0.6099 
+## F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+<blockquote>
+<p>The <code>RSE</code> (also known as the model sigma) is the residual
+variation, representing the average variation of the observations points
+around the fitted regression line. This is the standard deviation of
+residual errors.</p>
+<p><code>RSE</code> provides an absolute measure of patterns in the data
+that can’t be explained by the model. When comparing two models, the
+model with the small <code>RSE</code> is a good indication that this
+model fits the best the data.</p>
+<p>Dividing the <code>RSE</code> by the average value of the outcome
+variable will give you the prediction error rate, which should be as
+small as possible.</p>
+<p>In our example, <code>RSE = 3.91</code>, meaning that the observed
+sales values deviate from the true regression line by approximately
+<code>3.9</code> units in average.</p>
+Whether or not an <code>RSE</code> of <code>3.9</code> units is an
+acceptable prediction error is subjective and depends on the problem
+context. This is why we usually normalise it with respect to the
+predicted variable.
+</blockquote>
+
+Calculate the percentage error: <code>RSE/mean(y)</code>
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb42-1"></a><span class="fu">sigma</span>(model)<span class="sc">*</span><span class="dv">100</span><span class="sc">/</span><span class="fu">mean</span>(marketing<span class="sc">$</span>sales)</span></code></pre></div>
+<pre><code>## [1] 23.23877</code></pre>
+<blockquote>
+<p>The <code>R-squared (R2)</code> ranges from 0 to 1 and represents the
+proportion of information (i.e.&#160;variation) in the data that can be
+explained by the model. The adjusted <code>R-squared</code> adjusts for
+the degrees of freedom.</p>
+<p>The <code>R2</code> measures, how well the model fits the data. For a
+simple linear regression, <code>R2</code> is the square of the Pearson
+correlation coefficient.</p>
+<p>A high value of <code>R2</code> is a good indication. However, as the
+value of <code>R2</code> tends to increase when more predictors are
+added in the model, such as in multiple linear regression model, you
+should mainly consider the adjusted <code>R-squared</code>, which is a
+penalized <code>R2</code> for a higher number of predictors.</p>
+<p>An (adjusted) <code>R2</code> that is close to 1 indicates that a
+large proportion of the variability in the outcome has been explained by
+the regression model. A number near 0 indicates that the regression
+model did not explain much of the variability in the outcome.
+<code>F-Statistic</code>: The <code>F-statistic</code> gives the overall
+significance of the model. It assess whether at least one predictor
+variable has a non-zero coefficient.</p>
+<p>In a simple linear regression, this test is not really interesting
+since it just duplicates the information in given by the
+<code>t-test</code>, available in the coefficient table. In fact, the F
+test is identical to the square of the t
+<code>test: 312.1 = (17.67)^2</code>. This is true in any model with 1
+degree of freedom.</p>
+<p>The <code>F-statistic</code> becomes more important once we start
+using multiple predictors as in multiple linear regression.</p>
+A large <code>F-statistic</code> will corresponds to a statistically
+significant <code>p-value (p &lt; 0.05)</code>. In our example, the
+<code>F-statistic equal 312.14</code> producing a
+<code>p-value of 1.46e-42</code>, which is highly significant.
+</blockquote>
+
+Is the <code>F test</code> significant in our case?
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb44-1"></a><span class="co">#The F test is not significant for simple linear regression but a large F-statistic (312.1) will corresponds to a statistically significant p-value (p &lt; 0.05 : p = 2.2e-16) which is highly significant.</span></span></code></pre></div>
+<blockquote>
+Make sure your data meet the assumptions: We can use R to check that our
+data meet the four main assumptions for linear regression. This can be
+done only after the model conructiion as we will see.
+</blockquote>
+
+Check main assumptions for linear regression using plots seen in the
+course. Recall that they may summurised by : residuals need to be
+normal, independent and have same variance and <code>(X,y)</code> need
+to have good linear corrlation.
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb45-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span><a rel="noopener" href="#cb45-2"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<p><img src="javascript://" width="768"/></p>
+
+Give an interpretation of the <code>Residuals vs. Leverage</code> Plot.
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span><a rel="noopener" href="#cb46-1"></a><span class="co">#There is no outliers that exceed 3 standart deviations</span></span>
+<span><a rel="noopener" href="#cb46-2"></a><span class="co">#All data points, have a leverage statistic below 2(p + 1)/n = 0.02</span></span></code></pre></div>
+
+</div>
+</div>
+</div>
+
+   
+   
+            
+      
+
+  
+
+
+
+    
+  
+  
+
+
+<script type="module" src="https://s.brightspace.com/lib/bsi/20.22.9-241/unbundled/mathjax.js"></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
+					if (document.querySelector('math') || /\$\$|\\\(|\\\[|\\begin{|\\ref{|\\eqref{/.test(document.body.innerHTML)) {
+						document.querySelectorAll('mspace[linebreak="newline"]').forEach(elm => {
+							elm.setAttribute('style', 'display: block; height: 0.5rem;');
+						});
+
+						window.D2L.MathJax.loadMathJax({
+							'outputScale': 1.3,
+							'renderLatex': false
+						});
+					}
+				});</script><script type="module" src="https://s.brightspace.com/lib/bsi/20.22.9-241/unbundled/prism.js"></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
+					document.querySelectorAll('.d2l-code').forEach(code => {
+						window.D2L.Prism.formatCodeElement(code);
+					});
+				});</script></body></html>
